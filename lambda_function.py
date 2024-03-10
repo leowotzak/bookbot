@@ -107,11 +107,13 @@ def handler(event, context):
     driver.get(os.environ.get("URL") + str(course_code))
     print("course: '{}'".format(course_name))
 
+    # TODO Set time dropdown to earliest desired time
+
     # Choose next saturday
     # TODO Fall back to Sunday
     current_date = datetime.today() # * Assume it is Tuesday
     saturday_date = current_date + timedelta(4)
-    print("booking date: '{}'".format(saturday_date.date))
+    print("booking date: '{}'".format(saturday_date.strftime('%m/%d/%Y')))
 
     date_button = driver.find_element(By.XPATH, "//button[@id='begindate_vm_4_button']")
     ActionChains(driver).scroll_to_element(date_button).move_to_element(date_button).click().perform()
