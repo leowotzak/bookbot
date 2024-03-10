@@ -1,0 +1,22 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --platform linux/amd64 -t bookbot:latest
+    - name: Tag the Docker image
+      run: docker tag bookbot:latest 851272982543.dkr.ecr.us-east-1.amazonaws.com/bookbot:latest
+    - name: Push the Docker image
+      run: docker push 851272982543.dkr.ecr.us-east-1.amazonaws.com/bookbot:latest
