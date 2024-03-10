@@ -9,8 +9,6 @@ from selenium.webdriver.common.by import By
 
 from selenium_stealth import stealth
 
-# TODO Figure out how to make this work alongside other lambda
-
 
 def init_webdriver():
     # Create Chromeoptions instance
@@ -37,6 +35,7 @@ def init_webdriver():
 
     user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 \
         (KHTML, like Gecko) Chrome/60.0.3112.50 Safari/537.36'
+
     options.add_argument(f'user-agent={user_agent}')
     options.add_argument('--allow-running-insecure-content')
 
@@ -128,6 +127,11 @@ def handler(event, context):
     driver.get(os.environ.get("URL") + str(course_code))
     # TODO Set time dropdown to earliest desired time
 
+    WANT_TIME = os.environ.get("WANT_TIME")  # ex: '10:00 am'
+    driver.find_element(
+        By.XPATH,
+        "//input[@class='timepicker__input valid']").send_keys(WANT_TIME)
+
     # Choose next saturday
     # TODO Fall back to Sunday
     current_date = datetime.today()  # * Assume it is Tuesday
@@ -153,10 +157,8 @@ def handler(event, context):
     # ! Click done button
     # ! wasn't able to find this looking for "button" elements
     modal.find_element(
-        By.XPATH,
-        "/html/body/div[1]/div/div/div/b/font/b/font/font/font/form\
-            /div[1]/div[1]/div[1]/div[3]/div[1]/div/div/button"
-    ).click()
+        By.XPATH, "/html/body/div[1]/div/div/div/b/font/b/font/font/font/form\
+            /div[1]/div[1]/div[1]/div[3]/div[1]/div/div/button").click()
 
     # Update available tee times
     search_button = driver.find_element(
@@ -182,8 +184,7 @@ def handler(event, context):
         add_to_cart_button = time_table.find_element(
             By.XPATH, "//tr[1]//a[@data-tooltip='Add To Cart']")
     except NoSuchElementException:
-        # TODO add assertion that 'Unavailable' exists
-        msg = "earliest tee time was unavailable"
+        msg = "no available tee times found"
         print(msg)
         driver.close()
         return {'message': msg}

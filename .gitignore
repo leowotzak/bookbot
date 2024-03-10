@@ -1,5 +1,5 @@
 .venv
+.env
 __pycache__
 chromedriver.exe
 response.json
-main.py
