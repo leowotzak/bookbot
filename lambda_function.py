@@ -1,4 +1,4 @@
-import os, time
+import os
 from datetime import datetime, timedelta
 from tempfile import mkdtemp
 
@@ -10,6 +10,7 @@ from selenium.webdriver.common.by import By
 from selenium_stealth import stealth
 
 # TODO Figure out how to make this work alongside other lambda
+
 
 def init_webdriver():
     # Create Chromeoptions instance
@@ -33,7 +34,8 @@ def init_webdriver():
     options.add_argument(f"--disk-cache-dir={mkdtemp()}")
     options.add_argument("--remote-debugging-port=9222")
 
-    user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.50 Safari/537.36'
+    user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 \
+        (KHTML, like Gecko) Chrome/60.0.3112.50 Safari/537.36'
     options.add_argument(f'user-agent={user_agent}')
     options.add_argument('--allow-running-insecure-content')
 
@@ -49,19 +51,23 @@ def init_webdriver():
     # Setting the driver path and requesting a page
     driver = webdriver.Chrome(options=options, service=service)
 
-    stealth(driver,
+    stealth(
+        driver,
         languages=["en-US", "en"],
         vendor="Google Inc.",
         platform="Win32",
         webgl_vendor="Intel Inc.",
         renderer="Intel Iris OpenGL Engine",
         fix_hairline=True,
-        )
+    )
 
     # Changing the property of the navigator value for webdriver to undefined
-    driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+    driver.execute_script(
+        "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"
+    )
 
     return driver
+
 
 def handler(event, context):
     # Init
@@ -71,16 +77,21 @@ def handler(event, context):
     # Login
     driver.get(os.environ.get("LOGIN_URL"))
     username = os.environ.get("USERNAME")
-    user_input = driver.find_element(By.XPATH, "//input[@id='weblogin_username']")
+    user_input = driver.find_element(By.XPATH,
+                                     "//input[@id='weblogin_username']")
     user_input.send_keys(username)
-    password_input = driver.find_element(By.XPATH, "//input[@id='weblogin_password']")
+    password_input = driver.find_element(By.XPATH,
+                                         "//input[@id='weblogin_password']")
     password_input.send_keys(os.environ.get("PASSWORD"))
-    driver.find_element(By.XPATH, "//button[@id='weblogin_buttonlogin']").submit()
+    driver.find_element(By.XPATH,
+                        "//button[@id='weblogin_buttonlogin']").submit()
     print("signing in as {}".format(username))
 
     # Use previous session if exists
     try:
-        driver.find_element(By.XPATH, "//button[@id='loginresumesession_buttoncontinue']").click()
+        driver.find_element(
+            By.XPATH,
+            "//button[@id='loginresumesession_buttoncontinue']").click()
         print("using previous session")
     except NoSuchElementException:
         pass
@@ -117,66 +128,81 @@ def handler(event, context):
 
     # Choose next saturday
     # TODO Fall back to Sunday
-    current_date = datetime.today() # * Assume it is Tuesday
+    current_date = datetime.today()  # * Assume it is Tuesday
     saturday_date = current_date + timedelta(4)
     print("booking date: '{}'".format(saturday_date.strftime('%m/%d/%Y')))
 
-    date_button = driver.find_element(By.XPATH, "//button[@id='begindate_vm_4_button']")
-    ActionChains(driver).scroll_to_element(date_button).move_to_element(date_button).click().perform()
+    date_button = driver.find_element(By.XPATH,
+                                      "//button[@id='begindate_vm_4_button']")
+    ActionChains(driver).scroll_to_element(date_button).move_to_element(
+        date_button).click().perform()
 
     # * Was having some trouble finding elements on modal
     modal = driver.find_element(By.XPATH, "//div[@role='dialog']")
-    modal.find_element(By.XPATH, '//button[@id="begindate_vm_4_day_selection_button"]').click()
-    dropdown = modal.find_element(By.XPATH, "//div[@class='combobox__dropdown dropdown dropdown--state-open']")
-    dropdown.find_element(By.XPATH, "//li[@title='{}']".format(saturday_date.day)).click()
+    modal.find_element(
+        By.XPATH,
+        '//button[@id="begindate_vm_4_day_selection_button"]').click()
+    dropdown = modal.find_element(
+        By.XPATH,
+        "//div[@class='combobox__dropdown dropdown dropdown--state-open']")
+    dropdown.find_element(By.XPATH, "//li[@title='{}']".format(
+        saturday_date.day)).click()
 
     # ! Click done button
     # ! wasn't able to find this looking for "button" elements
-    modal.find_element(By.XPATH, "/html/body/div[1]/div/div/div/b/font/b/font/font/font/form/div[1]/div[1]/div[1]/div[3]/div[1]/div/div/button").click()
+    modal.find_element(
+        By.XPATH,
+        "/html/body/div[1]/div/div/div/b/font/b/font/font/font/form\
+            /div[1]/div[1]/div[1]/div[3]/div[1]/div/div/button"
+    ).click()
 
     # Update available tee times
-    search_button = driver.find_element(By.XPATH, "//button[@id='grwebsearch_buttonsearch']")
-    ActionChains(driver).scroll_to_element(search_button).move_to_element(search_button).click().perform()
+    search_button = driver.find_element(
+        By.XPATH, "//button[@id='grwebsearch_buttonsearch']")
+    ActionChains(driver).scroll_to_element(search_button).move_to_element(
+        search_button).click().perform()
     try:
-        time_table = driver.find_element(By.XPATH, "//table[@id='grwebsearch_output_table']")
+        time_table = driver.find_element(
+            By.XPATH, "//table[@id='grwebsearch_output_table']")
     except NoSuchElementException:
-        no_results_message = driver.find_element(By.XPATH, "//div[@id='grwebsearch_noresultsmessage']/p").text
+        no_results = driver.find_element(
+            By.XPATH, "//div[@id='grwebsearch_noresultsmessage']/p").text
 
-        assert "Your search did not return any matching results" in no_results_message
+        assert "Your search did not return any matching results" in no_results
 
         msg = "no tee times found in search"
         print(msg)
         driver.close()
-        return {
-            'message': msg
-        }
+        return {'message': msg}
 
     # Select earliest tee time
     try:
-        add_to_cart_button = time_table.find_element(By.XPATH, "//tr[1]//a[@data-tooltip='Add To Cart']")
+        add_to_cart_button = time_table.find_element(
+            By.XPATH, "//tr[1]//a[@data-tooltip='Add To Cart']")
     except NoSuchElementException:
         # TODO add assertion that 'Unavailable' exists
         msg = "earliest tee time was unavailable"
         print(msg)
         driver.close()
-        return {
-            'message': msg
-        }
-    ActionChains(driver).scroll_to_element(add_to_cart_button).move_to_element(add_to_cart_button).click().perform()
+        return {'message': msg}
+    ActionChains(driver).scroll_to_element(add_to_cart_button).move_to_element(
+        add_to_cart_button).click().perform()
 
     # * Book time
-    driver.find_element(By.XPATH, "//button[@id='golfmemberselection_buttononeclicktofinish']").click()
+    driver.find_element(
+        By.XPATH,
+        "//button[@id='golfmemberselection_buttononeclicktofinish']").click()
 
     # Confirm checkout confirmation
     assert "Checkout Confirmation" in driver.title
 
-    confirm_text = driver.find_element(By.XPATH, "//div[@id='webconfirmation_emailtext']")
+    confirm_text = driver.find_element(
+        By.XPATH, "//div[@id='webconfirmation_emailtext']")
     receipt_num = confirm_text.find_element(By.XPATH, "//h3").text
-    driver.find_element(By.XPATH, "//a[@id='webconfirmation_buttonlogout']").click()
+    driver.find_element(By.XPATH,
+                        "//a[@id='webconfirmation_buttonlogout']").click()
 
     msg = "successfully booked tee time: receipt #{}".format(receipt_num)
     print(msg)
     driver.close()
-    return {
-        'message': msg
-    }
+    return {'message': msg}
