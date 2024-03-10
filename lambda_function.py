@@ -71,15 +71,18 @@ def handler(event, context):
     # Login
     # TODO Login and then wait until 7:00Am, launch early to be ready
     driver.get(os.environ.get("LOGIN_URL"))
-    email_input = driver.find_element(By.XPATH, "//input[@id='weblogin_username']")
-    email_input.send_keys(os.environ.get("USERNAME"))
+    username = os.environ.get("USERNAME")
+    user_input = driver.find_element(By.XPATH, "//input[@id='weblogin_username']")
+    user_input.send_keys(username)
     password_input = driver.find_element(By.XPATH, "//input[@id='weblogin_password']")
     password_input.send_keys(os.environ.get("PASSWORD"))
     driver.find_element(By.XPATH, "//button[@id='weblogin_buttonlogin']").submit()
+    print("signing in as {}".format(username))
 
     # Use previous session if exists
     try:
         driver.find_element(By.XPATH, "//button[@id='loginresumesession_buttoncontinue']").click()
+        print("using previous session")
     except NoSuchElementException:
         pass
 
@@ -102,11 +105,14 @@ def handler(event, context):
                 'message': "unsupported golf course: {}".format(course_name)
             }
     driver.get(os.environ.get("URL") + str(course_code))
+    print("course: '{}'".format(course_name))
 
     # Choose next saturday
     # TODO Fall back to Sunday
     current_date = datetime.today() # * Assume it is Tuesday
     saturday_date = current_date + timedelta(4)
+    print("booking date: '{}'".format(saturday_date.date))
+
     date_button = driver.find_element(By.XPATH, "//button[@id='begindate_vm_4_button']")
     ActionChains(driver).scroll_to_element(date_button).move_to_element(date_button).click().perform()
 
@@ -128,19 +134,26 @@ def handler(event, context):
         time_table = driver.find_element(By.XPATH, "//table[@id='grwebsearch_output_table']")
     except NoSuchElementException:
         no_results_message = driver.find_element(By.XPATH, "//div[@id='grwebsearch_noresultsmessage']/p").text
+
         assert "Your search did not return any matching results" in no_results_message
+
+        msg = "no tee times found in search"
+        print(msg)
         driver.close()
         return {
-            'message': "no tee times found in search"
+            'message': msg
         }
 
     # TODO Keep trying, more robust time selection methodology
     try:
         add_to_cart_button = time_table.find_element(By.XPATH, "//tr[1]//a[@data-tooltip='Add To Cart']")
     except NoSuchElementException:
+        # TODO add assertion that 'Unavailable' exists
+        msg = "earliest tee time was unavailable"
+        print(msg)
         driver.close()
         return {
-            'message': "earliest tee time was unavailable"
+            'message': msg
         }
     ActionChains(driver).scroll_to_element(add_to_cart_button).move_to_element(add_to_cart_button).click().perform()
 
@@ -149,11 +162,14 @@ def handler(event, context):
 
     # Confirm checkout confirmation
     assert "Checkout Confirmation" in driver.title
+
     confirm_text = driver.find_element(By.XPATH, "//div[@id='webconfirmation_emailtext']")
     receipt_num = confirm_text.find_element(By.XPATH, "//h3").text
     driver.find_element(By.XPATH, "//a[@id='webconfirmation_buttonlogout']").click()
 
+    msg = "successfully booked tee time: receipt #{}".format(receipt_num)
+    print(msg)
     driver.close()
     return {
-        'message': "successfully booked tee time: receipt #{}".format(receipt_num)
+        'message': msg
     }
