@@ -118,11 +118,12 @@ def handler(event, context):
             }
 
     # Wait until 7:00 am
-    start_time = datetime.today().replace(hour=7, minute=0)
-    while True:
-        if datetime.now() >= start_time:
-            print("starting booking process...")
-            break
+    # ! Server is on eastern time
+    # start_time = datetime.today().replace(hour=8, minute=0)
+    # while True:
+    #     if datetime.now() >= start_time:
+    #         print("starting booking process...")
+    #         break
 
     driver.get(os.environ.get("URL") + str(course_code))
     # TODO Set time dropdown to earliest desired time
