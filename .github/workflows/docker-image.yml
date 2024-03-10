@@ -21,7 +21,7 @@ jobs:
     - name: Tag the Docker image
       run: docker tag bookbot:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/bookbot:latest
 
-    - name: Login to ECR
+    - name: Login to Docker using ECR
       uses: docker/login-action@v3
       with:
         registry: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
@@ -30,6 +30,20 @@ jobs:
 
     - name: Push the Docker image
       run: docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/bookbot:latest
+
+    - name: Install Job dependencies
+      run: |
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+        unzip awscliv2.zip
+        sudo ./aws/install
+
+    - name: Login to ECR
+      run: |
+        aws ecr get-login-password \
+          --region us-east-1 |\
+          docker login \
+            --username AWS \
+            --password-stdin ${{ AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
 
     - name: Update lambda function
       run: |
