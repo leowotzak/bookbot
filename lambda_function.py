@@ -125,12 +125,6 @@ def handler(event, context):
     #         break
 
     driver.get(os.environ.get("URL") + str(course_code))
-    # TODO Set time dropdown to earliest desired time
-
-    WANT_TIME = os.environ.get("WANT_TIME")  # ex: '10:00 am'
-    driver.find_element(
-        By.XPATH,
-        "//input[@class='timepicker__input valid']").send_keys(WANT_TIME)
 
     # Choose next saturday
     # TODO Fall back to Sunday
@@ -159,6 +153,16 @@ def handler(event, context):
     modal.find_element(
         By.XPATH, "/html/body/div[1]/div/div/div/b/font/b/font/font/font/form\
             /div[1]/div[1]/div[1]/div[3]/div[1]/div/div/button").click()
+
+    # Select earliest desired time
+    WANT_TIME = os.environ.get("WANT_TIME")  # ex: '10:00 am'
+    time_input = driver.find_element(
+        By.XPATH, "/html/body/div[1]/div/div/div/b/font/b/font/font/font\
+            /form/div[1]/div[1]/div[1]/div[2]/div[1]/div/input"
+    )
+    for _ in range(10):
+        time_input.send_keys(Keys.BACK_SPACE)
+    time_input.send_keys(WANT_TIME)
 
     # Update available tee times
     search_button = driver.find_element(
