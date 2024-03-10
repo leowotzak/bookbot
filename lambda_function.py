@@ -87,6 +87,7 @@ def handler(event, context):
 
     # Select desired golf course
     course_name = os.environ.get("COURSE_NAME")
+    print("course: '{}'".format(course_name))
     match course_name:
         case "Jimmy Clay Golf Course":
             course_code = 1
@@ -112,8 +113,6 @@ def handler(event, context):
             break
 
     driver.get(os.environ.get("URL") + str(course_code))
-    print("course: '{}'".format(course_name))
-
     # TODO Set time dropdown to earliest desired time
 
     # Choose next saturday
@@ -135,10 +134,9 @@ def handler(event, context):
     # ! wasn't able to find this looking for "button" elements
     modal.find_element(By.XPATH, "/html/body/div[1]/div/div/div/b/font/b/font/font/font/form/div[1]/div[1]/div[1]/div[3]/div[1]/div/div/button").click()
 
-    # Select earliest tee time
+    # Update available tee times
     search_button = driver.find_element(By.XPATH, "//button[@id='grwebsearch_buttonsearch']")
     ActionChains(driver).scroll_to_element(search_button).move_to_element(search_button).click().perform()
-
     try:
         time_table = driver.find_element(By.XPATH, "//table[@id='grwebsearch_output_table']")
     except NoSuchElementException:
@@ -153,7 +151,7 @@ def handler(event, context):
             'message': msg
         }
 
-    # TODO Keep trying, more robust time selection methodology
+    # Select earliest tee time
     try:
         add_to_cart_button = time_table.find_element(By.XPATH, "//tr[1]//a[@data-tooltip='Add To Cart']")
     except NoSuchElementException:
@@ -166,7 +164,7 @@ def handler(event, context):
         }
     ActionChains(driver).scroll_to_element(add_to_cart_button).move_to_element(add_to_cart_button).click().perform()
 
-    # ! Uncommenting this will actually book times
+    # * Book time
     driver.find_element(By.XPATH, "//button[@id='golfmemberselection_buttononeclicktofinish']").click()
 
     # Confirm checkout confirmation
