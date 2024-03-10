@@ -69,7 +69,6 @@ def handler(event, context):
     driver.implicitly_wait(int(os.environ.get("WAIT_TIME")))
 
     # Login
-    # TODO Login and then wait until 7:00Am, launch early to be ready
     driver.get(os.environ.get("LOGIN_URL"))
     username = os.environ.get("USERNAME")
     user_input = driver.find_element(By.XPATH, "//input[@id='weblogin_username']")
@@ -104,6 +103,14 @@ def handler(event, context):
             return {
                 'message': "unsupported golf course: {}".format(course_name)
             }
+
+    # Wait until 7:00 am
+    start_time = datetime.today().replace(hour=7, min=0)
+    while True:
+        if datetime.now() >= start_time:
+            print("starting booking process...")
+            break
+
     driver.get(os.environ.get("URL") + str(course_code))
     print("course: '{}'".format(course_name))
 
