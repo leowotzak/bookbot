@@ -31,12 +31,6 @@ jobs:
     - name: Push the Docker image
       run: docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/bookbot:latest
 
-    - name: Install Job dependencies
-      run: |
-        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-        unzip awscliv2.zip
-        sudo ./aws/install
-
     - name: Login to ECR
       run: |
         aws ecr get-login-password \
