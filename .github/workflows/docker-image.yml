@@ -31,6 +31,12 @@ jobs:
     - name: Push the Docker image
       run: docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/bookbot:latest
 
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-region: us-east-1
+        role-session-name: UpdateTeeTimeBooking
+
     - name: Login to ECR
       run: |
         aws ecr get-login-password \
