@@ -5,6 +5,7 @@ from tempfile import mkdtemp
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 
 from selenium_stealth import stealth
@@ -17,7 +18,7 @@ def init_webdriver():
 
     # * For local dev
     # TODO impl dev environment
-    # service = webdriver.ChromeService("./chromedriver.exe")
+    service = webdriver.ChromeService("./chromedriver.exe")
 
     options.binary_location = '/opt/chrome/chrome'
     options.add_argument("--headless=new")
