@@ -18,7 +18,7 @@ def init_webdriver():
 
     # * For local dev
     # TODO impl dev environment
-    service = webdriver.ChromeService("./chromedriver.exe")
+    # service = webdriver.ChromeService("./chromedriver.exe")
 
     options.binary_location = '/opt/chrome/chrome'
     options.add_argument("--headless=new")
