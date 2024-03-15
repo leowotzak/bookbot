@@ -159,8 +159,7 @@ def handler(event, context):
     WANT_TIME = os.environ.get("WANT_TIME")  # ex: '10:00 am'
     time_input = driver.find_element(
         By.XPATH, "/html/body/div[1]/div/div/div/b/font/b/font/font/font\
-            /form/div[1]/div[1]/div[1]/div[2]/div[1]/div/input"
-    )
+            /form/div[1]/div[1]/div[1]/div[2]/div[1]/div/input")
     for _ in range(10):
         time_input.send_keys(Keys.BACK_SPACE)
     time_input.send_keys(WANT_TIME)
@@ -206,11 +205,17 @@ def handler(event, context):
 
     confirm_text = driver.find_element(
         By.XPATH, "//div[@id='webconfirmation_emailtext']")
+    print("found confirm text")
     receipt_num = confirm_text.find_element(By.XPATH, "//h3").text
-    driver.find_element(By.XPATH,
-                        "//a[@id='webconfirmation_buttonlogout']").click()
+    print("found receipt number: {}".format(receipt_num))
+    logout_button = driver.find_element(
+        By.XPATH, "//a[@id='webconfirmation_buttonlogout']")
+    print("found webconfirm logout")
+    ActionChains(driver).scroll_to_element(logout_button).move_to_element(
+        logout_button).click().perform()
 
     msg = "successfully booked tee time: receipt #{}".format(receipt_num)
     print(msg)
-    driver.close()
+    driver.quit()
+    print("closed driver")
     return {'message': msg}
