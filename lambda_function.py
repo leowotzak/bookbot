@@ -70,6 +70,27 @@ def init_webdriver():
     return driver
 
 
+def day_to_offset(day: str) -> int:
+    match day:
+        case "Mon":
+            return 6
+        case "Tue":
+            return 0
+        case "Wed":
+            return 1
+        case "Thu":
+            return 2
+        case "Fri":
+            return 3
+        case "Sat":
+            return 4
+        case "Sun":
+            return 5
+        case _:
+            # No day of week provided, default to saturday
+            return 4
+
+
 def handler(event, context):
     # Init
     driver = init_webdriver()
@@ -127,12 +148,6 @@ def handler(event, context):
 
     driver.get(os.environ.get("URL") + str(course_code))
 
-    # Choose next saturday
-    # TODO Fall back to Sunday
-    current_date = datetime.today()  # * Assume it is Tuesday
-    saturday_date = current_date + timedelta(4)
-    print("booking date: '{}'".format(saturday_date.strftime('%m/%d/%Y')))
-
     date_button = driver.find_element(By.XPATH,
                                       "//button[@id='begindate_vm_4_button']")
     ActionChains(driver).scroll_to_element(date_button).move_to_element(
@@ -146,8 +161,14 @@ def handler(event, context):
     dropdown = modal.find_element(
         By.XPATH,
         "//div[@class='combobox__dropdown dropdown dropdown--state-open']")
+
+    # Select booking date, assuming today is Tuesday
+    book_day = os.environ.get("BOOK_DAY")
+    book_date = datetime.today() + timedelta(day_to_offset(book_day))
+    print("booking date: '{}'".format(book_date.strftime('%m/%d/%Y')))
+
     dropdown.find_element(By.XPATH, "//li[@title='{}']".format(
-        saturday_date.day)).click()
+        book_date.day)).click()
 
     # ! Click done button
     # ! wasn't able to find this looking for "button" elements
