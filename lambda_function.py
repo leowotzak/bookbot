@@ -143,7 +143,7 @@ def handler(event, context):
                                           minute=0,
                                           second=0,
                                           microsecond=0)
-    print("waiting until {}... ".format(datetime.now()))
+    print("waiting until {}... ".format(start_time))
     while True:
         if datetime.now() >= start_time:
             print("starting booking process...")
@@ -180,10 +180,19 @@ def handler(event, context):
             /div[1]/div[1]/div[1]/div[3]/div[1]/div/div/button").click()
 
     # Select earliest desired time
+    # TODO They disappear when they're past this time, causing errors
     WANT_TIME = os.environ.get("WANT_TIME")  # ex: '10:00 am'
-    time_input = driver.find_element(
-        By.XPATH, "/html/body/div[1]/div/div/div/b/font/b/font/font/font\
-            /form/div[1]/div[1]/div[1]/div[2]/div[1]/div/input")
+    try:
+        time_input = driver.find_element(
+            By.XPATH, "/html/body/div[1]/div/div/div/b/font/b/font/font/font\
+                /form/div[1]/div[1]/div[1]/div[2]/div[1]/div/input")
+    except NoSuchElementException:
+        msg = "want time {} not found in dropdown; they disappear when current time passes the given time".format(
+            WANT_TIME)
+        print(msg)
+        driver.quit()
+        return {'message': msg}
+
     for _ in range(10):
         time_input.send_keys(Keys.BACK_SPACE)
     time_input.send_keys(WANT_TIME)
