@@ -138,14 +138,16 @@ def handler(event, context):
                 'message': "unsupported golf course: {}".format(course_name)
             }
 
-    print("code datetime: ", datetime.now())
-    # Wait until 7:00 am
-    # ! Server is on eastern time
-    # start_time = datetime.today().replace(hour=8, minute=0)
-    # while True:
-    #     if datetime.now() >= start_time:
-    #         print("starting booking process...")
-    #         break
+    # Wait until 9:00 am CST
+    start_time = datetime.today().replace(hour=14,
+                                          minute=0,
+                                          second=0,
+                                          microsecond=0)
+    print("waiting until {}... ".format(datetime.now()))
+    while True:
+        if datetime.now() >= start_time:
+            print("starting booking process...")
+            break
 
     driver.get(os.environ.get("URL") + str(course_code))
 
@@ -168,8 +170,8 @@ def handler(event, context):
     book_date = datetime.today() + timedelta(day_to_offset(book_day))
     print("booking date: '{}'".format(book_date.strftime('%m/%d/%Y')))
 
-    dropdown.find_element(By.XPATH, "//li[@title='{}']".format(
-        book_date.day)).click()
+    dropdown.find_element(By.XPATH,
+                          "//li[@title='{}']".format(book_date.day)).click()
 
     # ! Click done button
     # ! wasn't able to find this looking for "button" elements
