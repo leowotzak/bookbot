@@ -133,7 +133,7 @@ def handler(event, context):
         case "Hancock Golf Course":
             course_code = 5
         case _:
-            driver.close()
+            driver.quit()
             return {
                 'message': "unsupported golf course: {}".format(course_name)
             }
@@ -201,7 +201,7 @@ def handler(event, context):
 
         msg = "no tee times found in search"
         print(msg)
-        driver.close()
+        driver.quit()
         return {'message': msg}
 
     # Select earliest tee time
@@ -211,7 +211,7 @@ def handler(event, context):
     except NoSuchElementException:
         msg = "no available tee times found"
         print(msg)
-        driver.close()
+        driver.quit()
         return {'message': msg}
     ActionChains(driver).scroll_to_element(add_to_cart_button).move_to_element(
         add_to_cart_button).click().perform()
