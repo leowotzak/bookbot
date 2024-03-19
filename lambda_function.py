@@ -223,7 +223,14 @@ def handler(event, context):
     #     "//button[@id='golfmemberselection_buttononeclicktofinish']").click()
 
     # Confirm checkout confirmation
-    assert "Checkout Confirmation" in driver.title
+    try:
+        assert "Checkout Confirmation" in driver.title
+    except AssertionError:
+        # Used to make debugging faster
+        driver.quit()
+        msg = "did not find confirm text"
+        print(msg)
+        return {'message': msg}
 
     confirm_text = driver.find_element(
         By.XPATH, "//div[@id='webconfirmation_emailtext']")
