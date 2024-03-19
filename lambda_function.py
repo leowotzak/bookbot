@@ -138,6 +138,7 @@ def handler(event, context):
                 'message': "unsupported golf course: {}".format(course_name)
             }
 
+    print("code datetime: ", datetime.now())
     # Wait until 7:00 am
     # ! Server is on eastern time
     # start_time = datetime.today().replace(hour=8, minute=0)
@@ -217,9 +218,9 @@ def handler(event, context):
         add_to_cart_button).click().perform()
 
     # * Book time
-    driver.find_element(
-        By.XPATH,
-        "//button[@id='golfmemberselection_buttononeclicktofinish']").click()
+    # driver.find_element(
+    #     By.XPATH,
+    #     "//button[@id='golfmemberselection_buttononeclicktofinish']").click()
 
     # Confirm checkout confirmation
     assert "Checkout Confirmation" in driver.title
