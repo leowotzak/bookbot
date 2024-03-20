@@ -146,7 +146,7 @@ def handler(event, context):
     print("waiting until {}... ".format(start_time))
     while True:
         if datetime.now() >= start_time:
-            print("starting booking process...")
+            print("starting booking process at {}...".format(datetime.now()))
             break
 
     driver.get(os.environ.get("URL") + str(course_code))
@@ -180,16 +180,17 @@ def handler(event, context):
             /div[1]/div[1]/div[1]/div[3]/div[1]/div/div/button").click()
 
     # Select earliest desired time
-    # TODO They disappear when they're past this time, causing errors
     WANT_TIME = os.environ.get("WANT_TIME")  # ex: '10:00 am'
     try:
         time_input = driver.find_element(
             By.XPATH, "/html/body/div[1]/div/div/div/b/font/b/font/font/font\
                 /form/div[1]/div[1]/div[1]/div[2]/div[1]/div/input")
     except NoSuchElementException:
-        msg = "want time {} not found in dropdown; they disappear when current time passes the given time".format(
-            WANT_TIME)
+        msg = "want time {} not found in dropdown".format(WANT_TIME)
         print(msg)
+        print("time selection options disappear when they are passed,")
+        print("so the current time is likely passed the desired time")
+        # TODO Select earliest as fallback
         driver.quit()
         return {'message': msg}
 
@@ -229,9 +230,9 @@ def handler(event, context):
         add_to_cart_button).click().perform()
 
     # * Book time
-    # driver.find_element(
-    #     By.XPATH,
-    #     "//button[@id='golfmemberselection_buttononeclicktofinish']").click()
+    driver.find_element(
+        By.XPATH,
+        "//button[@id='golfmemberselection_buttononeclicktofinish']").click()
 
     # Confirm checkout confirmation
     try:
