@@ -22,3 +22,4 @@ Push the image
 ```bash
 docker push 851272982543.dkr.ecr.us-east-1.amazonaws.com/bookbot:latest
 ```
+
